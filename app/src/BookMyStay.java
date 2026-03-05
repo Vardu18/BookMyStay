@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class BookMyStay {
     public static void main(String[] args) {
 
@@ -94,5 +96,129 @@ class SuiteRoom extends Room {
 
     public SuiteRoom() {
         super(3, 750, 5000.0);
+    }
+}
+
+import java.util.HashMap;
+
+/**
+ * Book My Stay App
+ * Use Case 3: Centralized Room Inventory Management
+ * Demonstrates the use of HashMap for managing room availability.
+ *
+ * @author Varad
+ * @version 1.0
+ */
+
+public class UseCase3InventorySetup {
+
+    public static void main(String[] args) {
+
+        System.out.println("Hotel Room Inventory Status\n");
+
+        // Create room objects
+        Room single = new SingleRoom();
+        Room doubleRoom = new DoubleRoom();
+        Room suite = new SuiteRoom();
+
+        // Create inventory
+        RoomInventory inventory = new RoomInventory();
+
+        // Register room availability
+        inventory.setAvailability("Single Room", 5);
+        inventory.setAvailability("Double Room", 3);
+        inventory.setAvailability("Suite Room", 2);
+
+        // Display Single Room
+        System.out.println("Single Room:");
+        single.displayRoomDetails();
+        System.out.println("Available Rooms: " + inventory.getAvailability("Single Room"));
+        System.out.println();
+
+        // Display Double Room
+        System.out.println("Double Room:");
+        doubleRoom.displayRoomDetails();
+        System.out.println("Available Rooms: " + inventory.getAvailability("Double Room"));
+        System.out.println();
+
+        // Display Suite Room
+        System.out.println("Suite Room:");
+        suite.displayRoomDetails();
+        System.out.println("Available Rooms: " + inventory.getAvailability("Suite Room"));
+    }
+}
+
+/**
+ * Abstract class representing a generic room
+ */
+abstract class Room {
+
+    protected int numberOfBeds;
+    protected int squareFeet;
+    protected double pricePerNight;
+
+    public Room(int beds, int size, double price) {
+        this.numberOfBeds = beds;
+        this.squareFeet = size;
+        this.pricePerNight = price;
+    }
+
+    public void displayRoomDetails() {
+        System.out.println("Beds: " + numberOfBeds);
+        System.out.println("Size: " + squareFeet + " sqft");
+        System.out.println("Price per night: " + pricePerNight);
+    }
+}
+
+/**
+ * Single Room
+ */
+class SingleRoom extends Room {
+
+    public SingleRoom() {
+        super(1, 250, 1500.0);
+    }
+}
+
+/**
+ * Double Room
+ */
+class DoubleRoom extends Room {
+
+    public DoubleRoom() {
+        super(2, 400, 2500.0);
+    }
+}
+
+/**
+ * Suite Room
+ */
+class SuiteRoom extends Room {
+
+    public SuiteRoom() {
+        super(3, 750, 5000.0);
+    }
+}
+
+/**
+ * RoomInventory class manages centralized availability using HashMap
+ */
+class RoomInventory {
+
+    private HashMap<String, Integer> availability;
+
+    // Constructor initializes inventory
+    public RoomInventory() {
+        availability = new HashMap<>();
+    }
+
+    // Set availability
+    public void setAvailability(String roomType, int count) {
+        availability.put(roomType, count);
+    }
+
+    // Get availability
+    public int getAvailability(String roomType) {
+        return availability.get(roomType);
     }
 }
