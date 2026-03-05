@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class BookMyStay {
     public static void main(String[] args) {
@@ -153,6 +155,34 @@ public class UseCase3InventorySetup {
         search.displayAvailableRooms(single, "Single Room");
         search.displayAvailableRooms(doubleRoom, "Double Room");
         search.displayAvailableRooms(suite, "Suite Room");
+
+        System.out.println("\nBooking Request Queue");
+
+// Initialize queue
+        BookingRequestQueue bookingQueue = new BookingRequestQueue();
+
+// Create booking requests
+        Reservation r1 = new Reservation("Abhi", "Single");
+        Reservation r2 = new Reservation("Subha", "Double");
+        Reservation r3 = new Reservation("Vanmathi", "Suite");
+
+// Add requests
+        bookingQueue.addRequest(r1);
+        bookingQueue.addRequest(r2);
+        bookingQueue.addRequest(r3);
+
+// Process requests in FIFO order
+        while (bookingQueue.hasPendingRequests()) {
+
+            Reservation request = bookingQueue.getNextRequest();
+
+            System.out.println(
+                    request.getGuestName() +
+                            " requested " +
+                            request.getRoomType() +
+                            " Room"
+            );
+        }
     }
 }
 
@@ -250,5 +280,45 @@ class SearchService {
             System.out.println("Available Rooms: " + available);
             System.out.println();
         }
+    }
+}
+
+class Reservation {
+
+    private String guestName;
+    private String roomType;
+
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
+
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+}
+
+class BookingRequestQueue {
+
+    private Queue<Reservation> requestQueue;
+
+    public BookingRequestQueue() {
+        requestQueue = new LinkedList<>();
+    }
+
+    public void addRequest(Reservation reservation) {
+        requestQueue.offer(reservation);
+    }
+
+    public Reservation getNextRequest() {
+        return requestQueue.poll();
+    }
+
+    public boolean hasPendingRequests() {
+        return !requestQueue.isEmpty();
     }
 }
