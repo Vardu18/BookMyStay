@@ -246,6 +246,22 @@ public class UseCase3InventorySetup {
         bookingQueue.addRequest(reservation);
 
         System.out.println("Booking request accepted for " + guestName);
+
+        System.out.println("\nBooking Cancellation");
+
+// Initialize cancellation service
+        CancellationService cancellationService = new CancellationService();
+
+// Example cancellation
+        String reservationId = "Single-2";
+        String roomType = "Single";
+
+        cancellationService.cancelReservation(
+                reservationId,
+                roomType,
+                inventory,
+                history
+        );
     }
 }
 
@@ -567,5 +583,46 @@ class ReservationValidator {
         if (available <= 0) {
             throw new InvalidBookingException("No available rooms for type: " + roomType);
         }
+    }
+}
+class CancellationService {
+
+    // Stack to track released room IDs
+    private Stack<String> rollbackStack;
+
+    public CancellationService() {
+        rollbackStack = new Stack<>();
+    }
+
+    public void cancelReservation(
+            String reservationId,
+            String roomType,
+            RoomInventory inventory,
+            BookingHistory history
+    ) {
+
+        // Validate reservation exists
+        boolean exists = false;
+
+        for (Reservation r : history.getBookings()) {
+            if (r.getRoomType().equals(roomType)) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
+            System.out.println("Cancellation failed: reservation not found.");
+            return;
+        }
+
+        // Push released room ID to rollback stack
+        rollbackStack.push(reservationId);
+
+        // Restore inventory
+        int available = inventory.getAvailability(roomType);
+        inventory.setAvailability(roomType, available + 1);
+
+        System.out.println("Reservation cancelled. Room released: " + reservationId);
     }
 }
