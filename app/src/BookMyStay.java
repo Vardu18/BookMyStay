@@ -262,6 +262,36 @@ public class UseCase3InventorySetup {
                 inventory,
                 history
         );
+
+        System.out.println("\nConcurrent Booking Simulation");
+
+// Add requests to queue
+        bookingQueue.addRequest(new Reservation("Abhi", "Single"));
+        bookingQueue.addRequest(new Reservation("Subha", "Single"));
+        bookingQueue.addRequest(new Reservation("Vanmathi", "Suite"));
+        bookingQueue.addRequest(new Reservation("Karthik", "Double"));
+
+// Create allocation service
+        RoomAllocationService allocationService = new RoomAllocationService();
+
+// Create multiple threads
+        ConcurrentBookingProcessor t1 =
+                new ConcurrentBookingProcessor(bookingQueue, allocationService, inventory);
+
+        ConcurrentBookingProcessor t2 =
+                new ConcurrentBookingProcessor(bookingQueue, allocationService, inventory);
+
+// Start threads
+        t1.start();
+        t2.start();
+
+// Wait for completion
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 
@@ -624,5 +654,46 @@ class CancellationService {
         inventory.setAvailability(roomType, available + 1);
 
         System.out.println("Reservation cancelled. Room released: " + reservationId);
+    }
+}
+
+class ConcurrentBookingProcessor extends Thread {
+
+    private BookingRequestQueue bookingQueue;
+    private RoomAllocationService allocationService;
+    private RoomInventory inventory;
+
+    public ConcurrentBookingProcessor(
+            BookingRequestQueue bookingQueue,
+            RoomAllocationService allocationService,
+            RoomInventory inventory
+    ) {
+        this.bookingQueue = bookingQueue;
+        this.allocationService = allocationService;
+        this.inventory = inventory;
+    }
+
+    @Override
+    public void run() {
+
+        while (true) {
+
+            Reservation reservation;
+
+            // synchronized access to shared queue
+            synchronized (bookingQueue) {
+
+                if (!bookingQueue.hasPendingRequests()) {
+                    break;
+                }
+
+                reservation = bookingQueue.getNextRequest();
+            }
+
+            // critical section for allocation
+            synchronized (allocationService) {
+                allocationService.allocateRoom(reservation, inventory);
+            }
+        }
     }
 }
