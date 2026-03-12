@@ -292,6 +292,39 @@ public class UseCase3InventorySetup {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        System.out.println("System Recovery");
+
+// Persistence service
+        PersistenceService persistenceService = new PersistenceService();
+
+// Try loading saved inventory
+        Map<String, Integer> savedData = persistenceService.loadInventory();
+
+        RoomInventory inventory = new RoomInventory();
+
+        if (savedData != null) {
+
+            for (String roomType : savedData.keySet()) {
+                inventory.setAvailability(roomType, savedData.get(roomType));
+            }
+
+        } else {
+
+            // Default inventory
+            inventory.setAvailability("Single", 5);
+            inventory.setAvailability("Double", 3);
+            inventory.setAvailability("Suite", 2);
+        }
+
+        System.out.println("\nCurrent Inventory:");
+
+        System.out.println("Single: " + inventory.getAvailability("Single"));
+        System.out.println("Double: " + inventory.getAvailability("Double"));
+        System.out.println("Suite: " + inventory.getAvailability("Suite"));
+
+// Save state
+        persistenceService.saveInventory(inventory);
     }
 }
 
@@ -696,4 +729,41 @@ class ConcurrentBookingProcessor extends Thread {
             }
         }
     }
+}
+class PersistenceService {
+
+    private static final String FILE_NAME = "inventory.dat";
+
+    // Save inventory to file
+    public void saveInventory(RoomInventory inventory) {
+
+        try (ObjectOutputStream out =
+                     new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+
+            out.writeObject(inventory.getAllAvailability());
+
+            System.out.println("Inventory saved successfully.");
+
+        } catch (IOException e) {
+            System.out.println("Error saving inventory: " + e.getMessage());
+        }
+    }
+
+    // Load inventory from file
+    public Map<String, Integer> loadInventory() {
+
+        try (ObjectInputStream in =
+                     new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+
+            return (Map<String, Integer>) in.readObject();
+
+        } catch (Exception e) {
+
+            System.out.println("No valid inventory data found. Starting fresh.");
+            return null;
+        }
+    }
+}
+public Map<String, Integer> getAllAvailability() {
+    return availability;
 }
