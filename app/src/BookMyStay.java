@@ -216,6 +216,19 @@ public class UseCase3InventorySetup {
 
             manager.displayServices(reservationId);
         }
+        System.out.println("\nBooking History Tracking");
+
+// Initialize booking history
+        BookingHistory history = new BookingHistory();
+
+// Store confirmed reservations
+        history.addBooking(r1);
+        history.addBooking(r2);
+        history.addBooking(r3);
+
+// Generate report
+        BookingReportService reportService = new BookingReportService();
+        reportService.displayBookingReport(history);
     }
 }
 
@@ -470,5 +483,43 @@ class AddOnServiceManager {
         }
 
         System.out.println("Total Add-On Cost: " + calculateTotalCost(reservationId));
+    }
+}
+import java.util.*;
+
+class BookingHistory {
+
+    // Stores confirmed reservations in order
+    private List<Reservation> confirmedBookings;
+
+    public BookingHistory() {
+        confirmedBookings = new ArrayList<>();
+    }
+
+    // Add confirmed reservation
+    public void addBooking(Reservation reservation) {
+        confirmedBookings.add(reservation);
+    }
+
+    // Retrieve all bookings
+    public List<Reservation> getBookings() {
+        return confirmedBookings;
+    }
+}
+class BookingReportService {
+
+    public void displayBookingReport(BookingHistory history) {
+
+        System.out.println("\nBooking History Report");
+
+        for (Reservation r : history.getBookings()) {
+
+            System.out.println(
+                    "Guest: " + r.getGuestName() +
+                            ", Room Type: " + r.getRoomType()
+            );
+        }
+
+        System.out.println("Total Bookings: " + history.getBookings().size());
     }
 }
